@@ -5,12 +5,11 @@ import "../instances/Ilevel00.sol";
 import "forge-std/Script.sol";
 
 contract Attacker is Script {
-    Instance level0 = Instance(0x962E1d80D48fBF697Fa4cE311711e8f3B5D93AC4);
+    Instance level0 = Instance(0x3c9f001a0C769B5f70739443E9d83227a9Db976e);
 
     function run() external {
         vm.startBroadcast();
-        level0.password();
-        level0.authenticate(level0.password());
+        level0.authenticate("ethernaut0");
         vm.stopBroadcast();
     }
 }
