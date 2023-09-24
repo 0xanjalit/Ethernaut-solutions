@@ -1,5 +1,6 @@
 # Ethernaut-ctf-solutions
 i'm using sepolia testnet for the transactions, u can choose testnet accordingly. All the instance code is in instances folder.
+
 ## level00 - Hello Ethernaut
   1. As we can see all the functions are directing us to authenticate() fun. where we need to
      enter password.
@@ -33,6 +34,7 @@ i'm using sepolia testnet for the transactions, u can choose testnet accordingly
      forge script ./script/level01.s.sol broadcast -vvvv --rpc-url $RPC_URL --private-key $PKEY
      ```
   5. submit the instance , u're done
+     
 ## level02 - Fallout
   1. same as previous one we need to get the ownership here
   2. we can achieve that by simply calling Fal1out() either from the console
@@ -41,6 +43,23 @@ i'm using sepolia testnet for the transactions, u can choose testnet accordingly
      ```
      or using script file level02.s.sol
   3. submit the instance, u're done.
+
+## level06 - Delegation
+  1. our goal here is to claim ownership of the given instance which we can do 
+     using pwn() fun.
+  2. We need to trigger the fallback function in the Delegation contract to           invoke the pwn() function via msg.data which will then make a delegate
+     call to pwn() and make msg.sender the owner.
+  3. to do this first we need to get methodId of pwn()
+     ```
+     cast calldata "pwn()"
+     ```
+     then call the fallback fun.
+     ```
+     cast send $LEVEL_ADDRESS 0xdd365b8b --gas-limit 50000 --rpc-url $RPC_URL --private-key $PKEY
+     // we need to set a custom gas limit for this transaction as the default amount insufficient
+     ```
+  4. send the transaction, submit instance, u're done 
+     
 ## level07 - Force 
   1. here we need to increase the balance of our contract, but neither it has         any recieve() or fallback() fun. , so what we gonna use is selfdestruct()
   2. preferably, we'll use remix as new versions of solidity doesn't support 
