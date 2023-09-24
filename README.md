@@ -43,7 +43,24 @@ i'm using sepolia testnet for the transactions, u can choose testnet accordingly
      ```
      or using script file level02.s.sol
   3. submit the instance, u're done.
-
+     
+## level05 - Token
+  1. the goal here is to get our hands on any additional token
+  2. vulnerability lies here in the 2nd line of transfer function where it is 
+     deducting msg.sender's balance, as this contract uses older version of
+     solidity it is prone to underflow/overflow.
+  3. so the hack is we'll cause an underflow by sending 21 tokens which will make
+     balance[msg.sender] = 20 - 21 = max limit for uint256, and increase it by a      large value
+  4. we can do this by calling transfer function either thru cast send command
+     ```
+     cast send $LEVEL_ADDRESS "transfer(address _to, uint256 _value)" 0xb364AC25023f1859df404e4AE9aeC80Ab425b0C7 21 --rpc-url $RPC_URL --private-key $PKEY
+     ```
+     or using our script file level05.s.sol
+     ```
+     forge script ./script/level05.s.sol broadcast -vvvv --rpc-url $RPC_URL --private-key $PKEY
+     ```
+  5. submit the instance, u're done.
+     
 ## level06 - Delegation
   1. our goal here is to claim ownership of the given instance which we can do 
      using pwn() fun.
