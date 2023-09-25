@@ -4,8 +4,7 @@ i'm using sepolia testnet for the transactions, u can choose testnet accordingly
 
 ## level00 - Hello Ethernaut
 
-1. As we can see all the functions are directing us to authenticate() fun. where we need to
-   enter password.
+1. As we can see all the functions are directing us to authenticate() fun. where we need to enter password.
 2. we can get the password from console
    ```console
    await contract.password()
@@ -82,11 +81,8 @@ i'm using sepolia testnet for the transactions, u can choose testnet accordingly
 ## level05 - Token
 
 1. the goal here is to get our hands on any additional token
-2. vulnerability lies here in the 2nd line of transfer function where it is
-   deducting msg.sender's balance, as this contract uses older version of
-   solidity it is prone to underflow/overflow.
-3. so the hack is we'll cause an underflow by sending 21 tokens which will make
-   balance[msg.sender] = 20 - 21 = max limit for uint256, and increase it by a large value
+2. vulnerability lies here in the 2nd line of transfer function where it is deducting msg.sender's balance, as this contract uses older version of solidity it is prone to underflow/overflow.
+3. so the hack is we'll cause an underflow by sending 21 tokens which will make balance[msg.sender] = 20 - 21 = max limit for uint256, and increase it by a large value
 4. we can do this by calling transfer function either thru cast send command
    ```terminal
    cast send $LEVEL_ADDRESS "transfer(address _to, uint256 _value)" 0xb364AC25023f1859df404e4AE9aeC80Ab425b0C7 21 --rpc-url $RPC_URL --private-key $PKEY
@@ -99,10 +95,8 @@ i'm using sepolia testnet for the transactions, u can choose testnet accordingly
 
 ## level06 - Delegation
 
-1. our goal here is to claim ownership of the given instance which we can do
-   using pwn() fun.
-2. We need to trigger the fallback function in the Delegation contract to invoke the pwn() function via msg.data which will then make a delegate
-   call to pwn() and make msg.sender the owner.
+1. our goal here is to claim ownership of the given instance which we can do using pwn() fun.
+2. We need to trigger the fallback function in the Delegation contract to invoke the pwn() function via msg.data which will then make a delegate call to pwn() and make msg.sender the owner.
 3. to do this first we need to get methodId of pwn()
    ```terminal
    cast calldata "pwn()"
@@ -118,6 +112,7 @@ i'm using sepolia testnet for the transactions, u can choose testnet accordingly
 
 1. here we need to increase the balance of our contract, but neither it has any recieve() or fallback() fun. , so what we gonna use is selfdestruct()
 2. preferably use remix, as new versions of solidity doesn't support selfdestruct(), source code:
+
    ```solidity
    // SPDX-License-Identifier: MIT
    pragma solidity ^0.6.0;
@@ -128,6 +123,7 @@ i'm using sepolia testnet for the transactions, u can choose testnet accordingly
        }
    }
    ```
+
 3. we'll send some eth at deployment time to increase contract balance and cuz of selfdestruct all this will go to Force contract
 4. we're using selfdestruct() in constructor itself, so it can operate at deployment time and we don't need to call any other function
 5. submit the instance after deployment, u're done.
@@ -135,14 +131,12 @@ i'm using sepolia testnet for the transactions, u can choose testnet accordingly
 ## level08 - Vault
 
 1. Nothing on the blockchain is considered to be private, not even private variables. Acc. to the contract
-1. storage slot 0 = locked
-1. storage slot 1 = password
-1. So we can easily get the value of password by inspecting storage slot 1
-
-```terminal
-cast storage $LEVEL_ADDRESS 1 --rpc-url $RPC_URL
-```
-
+   1. storage slot 0 = locked
+   2. storage slot 1 = password
+2. So we can easily get the value of password by inspecting storage slot 1
+   ```terminal
+   cast storage $LEVEL_ADDRESS 1 --rpc-url $RPC_URL
+   ```
 3. Now pass the extracted password to unlock function
 
 ```
