@@ -1,6 +1,6 @@
 # Ethernaut-ctf-solutions
 
-i'm using sepolia testnet for the transactions, u can choose testnet accordingly. All the instance code is in instances folder.
+i'm using sepolia testnet for the transactions, u can choose testnet accordingly. All the instance code is in instances folder and the $LEVEL_ADDRESS used is the instance address for respective levels.
 
 ## level00 - Hello Ethernaut
 
